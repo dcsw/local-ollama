@@ -1,0 +1,43 @@
+services:
+  ollama:
+    build: 
+      context: .
+      args:
+          # This maps the variable from your .env file to the Docker build
+          - OLLAMA_SMALL_MODEL=${OLLAMA_SMALL_MODEL}
+          - OLLAMA_MEDIUM_MODEL=${OLLAMA_MEDIUM_MODEL}
+    container_name: ollama
+    volumes:
+    #   - ./data:/root/.ollama
+      - ./temp:/xxx
+    # Comment this deploy stanza out if you don't have an nvidia gpu
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - OLLAMA_NO_CLOUD:true
+      - OLLAMA_SMALL_MODEL=${OLLAMA_SMALL_MODEL}
+      - OLLAMA_MEDIUM_MODEL=${OLLAMA_MEDIUM_MODEL}
+    ports:
+      - 11434:11434
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      - "4000:8080"
+    environment:
+      - 'OLLAMA_BASE_URL=http://ollama:11434'
+    volumes:
+      - open-webui:/app/data
+    depends_on:
+      - ollama
+    restart: always
+
+volumes:
+  ollama:
+  open-webui:
