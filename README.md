@@ -4,8 +4,8 @@ A lightweight, self‑hosted setup for running Ollama models locally.
 
 ## Features
 - Simple Docker‑compose configuration
-- Automatic model download on first run
-- Health‑check endpoint
+- Automatic model download at container build time, not runtime
+- Open WebUI
 - Persistent storage for models and data
 
 ## Quick start
@@ -23,45 +23,49 @@ The API will be available at `http://localhost:11434`. You can test it with:
 curl http://localhost:11434/api/version
 ```
 
+Open WebUI will be available at [http://localhost:4000](http://localhost:4000).
+
 ## Configuration
-- **`docker-compose.yml`** – edit ports, volumes, and environment variables.
-- **`ollama.env`** – set `OLLAMA_HOST`, `OLLAMA_MODELS_PATH`, etc.
+- **`compose.yml`** – edit ports, volumes, and environment variables.
+- **`.env`** – set `OLLAMA_SMALL_MODEL`, `OLLAMA_MEDIUM_MODEL`, `OPENROUTER_API_KEY`, etc.
 
 ## Updating models
+
+You can add new models to your setup by pulling them.
+
 ```bash
 # Pull a new model (e.g., llama2)
 ollama pull llama2
 ```
 
+These will persist through restarts
+
+## Removing models
+
+You can remove models using a similar process.
+
+```bash
+# Remove a model permanently
+ollama remove llama2
+```
+
+Note that the models defined in `OLLAMA_SMALL_MODEL` and `OLLAMA_MEDIUM_MODEL` will be reloaded when the container is rebuilt.
+
 ## Development
-To use different or additional pre‑loaded models, edit the environment variables that control model loading. The primary variables are defined in `ollama.env` and referenced in `docker-compose.yml`.
+To use different or additional pre‑loaded models, edit the environment variables that control model loading. The primary variables are defined in `.env` and referenced in `compose.yml`.
 
-### 1. Choose models in `ollama.env`
+### 1. Choose models in `.env`
 ```
-# ollama.env
-# Space‑separated list of model names to pull on container start
-OLLAMA_PRELOAD_MODELS="llama2 llama2:13b mistral"
+# .env
+OLLAMA_SMALL_MODEL=gemma4:e4b-it-q8_0
+OLLAMA_MEDIUM_MODEL=gemma4:e4b-it-q8_0
 ```
-Add any model names supported by Ollama. The container will automatically pull them the first time it starts.
+Add any model names supported by Ollama. The container will automatically pull them on build.
 
-### 2. Ensure the Dockerfile copies the `.env`
-If you customise the Dockerfile, make sure it includes:
-```Dockerfile
-COPY ollama.env /app/ollama.env
-ENV $(cat /app/ollama.env | xargs)
-```
-This loads the variables into the container environment.
-
-### 3. Re‑build and restart
+### 2. Re‑build and restart
 ```bash
 docker compose build --no-cache   # rebuild with new env changes
 docker compose up -d            # restart services
-```
-
-### 4. Linting and testing
-```bash
-make lint   # run linter
-make test   # execute test suite (if present)
 ```
 
 ## License

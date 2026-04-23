@@ -8,8 +8,7 @@ services:
           - OLLAMA_MEDIUM_MODEL=${OLLAMA_MEDIUM_MODEL}
     container_name: ollama
     volumes:
-    #   - ./data:/root/.ollama
-      - ./temp:/xxx
+      - ./data:/root/.ollama
     # Comment this deploy stanza out if you don't have an nvidia gpu
     deploy:
       resources:
