@@ -1,0 +1,37 @@
+FROM ollama/ollama:0.20.5
+
+# YOU MUST ADD THESE TWO LINES HERE
+ARG OLLAMA_EMBEDDING_MODEL=nomic-embed-text
+ARG OLLAMA_SMALL_MODEL=gemma4:e4b
+ARG OLLAMA_MEDIUM_MODEL=gemma4:e4b
+
+# Pre-download the model if/when none are there
+RUN cat <<EOF > /entrypoint.sh && chmod +x /entrypoint.sh
+    #!/usr/bin/stdbuf -oL -eL /bin/bash   
+    if [ ! -d /app/backend/data/models ]; then
+        echo "Fetching models..." >> /proc/1/fd/1  # For stdout
+        ollama serve & >> /proc/1/fd/1  # For stdout
+        sleep 5
+        ollama pull ${OLLAMA_EMBEDDING_MODEL} >> /proc/1/fd/1  # For stdout
+        ollama pull ${OLLAMA_SMALL_MODEL} >> /proc/1/fd/1  # For stdout
+        ollama pull ${OLLAMA_MEDIUM_MODEL} >> /proc/1/fd/1  # For stdout
+        pkill ollama >> /proc/1/fd/1  # For stdout
+        echo "Models fetched." >> /proc/1/fd/1  # For stdout
+    fi
+    
+    # Execute the main application process
+    echo "Starting ollama server" >> /proc/1/fd/1  # For stdout
+    # exec "$@"
+    ollama serve
+EOF
+
+# Optionally, set a default model to keep loaded in memory
+ENV OLLAMA_KEEP_ALIVE=24h
+ENV OLLAMA_NO_CLOUD=true
+
+# Set the entrypoint
+ENTRYPOINT ["/usr/bin/stdbuf", "-oL", "-eL", "bash", "-c", "/entrypoint.sh"]
+
+
+
+# ENTRYPOINT ["ollama", "serve"]

@@ -1,0 +1,9 @@
+FROM ghcr.io/open-webui/open-webui:main
+
+ARG DEFAULT_MODEL=gemma4:e4b
+
+# Set Ollama default model
+ENV DEFAULT_MODELS=${DEFAULT_MODEL}
+
+# Optional: Set other configurations
+ENV WEBUI_AUTH=False

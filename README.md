@@ -13,12 +13,21 @@ A lightweight, self‑hosted setup for running Ollama models locally.
 # Clone the repo
 git clone https://github.com/yourorg/local-ollama.git
 cd local-ollama
+```
+
+## Create a .env file w/a new Open WebUI secret
+```bash
+sed 's/your_open_webui_secret_here/'\'$(openssl rand -hex 32)\''/' .example.env > moo
+```
 
 # Start services
+```bash
 docker compose up -d
 ```
 
-The API will be available at `http://localhost:11434`. You can test it with:
+Ollama's API will be available at `http://localhost:11434`. 
+
+You can test it with:
 ```bash
 curl http://localhost:11434/api/version
 ```
@@ -57,8 +66,8 @@ To use different or additional pre‑loaded models, edit the environment variabl
 ### 1. Choose models in `.env`
 ```
 # .env
-OLLAMA_SMALL_MODEL=gemma4:e4b-it-q8_0
-OLLAMA_MEDIUM_MODEL=gemma4:e4b-it-q8_0
+OLLAMA_SMALL_MODEL=gemma4:e4b
+OLLAMA_MEDIUM_MODEL=gemma4:e4b
 ```
 Add any model names supported by Ollama. The container will automatically pull them on build.
 
